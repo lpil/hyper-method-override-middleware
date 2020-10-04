@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/hyper-method-override-middleware.svg)](https://crates.io/crates/hyper-method-override-middleware)
 [![Documentation](https://docs.rs/hyper-method-override-middleware/badge.svg)](https://docs.rs/hyper-method-override-middleware)
-[![Apache-2 licensed](https://img.shields.io/crates/l/hyper-method-override-middleware.svg)](./LICENSE)
+[![Apache-2 licensed](https://img.shields.io/crates/l/hyper-method-override-middleware.svg)](./LICENCE)
 <!-- [![CI](https://github.com/lpil/hyper-method-override-middleware/workflows/CI/badge.svg)](https://github.com/lpil/hyper-method-override-middleware/actions) -->
 
 A middleware for Hyper that overrides an incoming POST request with a method
