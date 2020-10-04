@@ -1,0 +1,9 @@
+[package]
+name = "hyper-method-override-middleware"
+version = "0.1.0"
+authors = ["Louis Pilfold <louis@lpil.uk>"]
+edition = "2018"
+
+[dependencies]
+hyper = "0.13"
+url = "2.1"
