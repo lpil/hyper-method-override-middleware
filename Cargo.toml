@@ -4,6 +4,13 @@ version = "0.1.0"
 authors = ["Louis Pilfold <louis@lpil.uk>"]
 edition = "2018"
 
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/lpil/hyper-method-override-middleware"
+description = "A Hyper service middleware that overrides HTTP methods based on a _method query param, to allow web browsers to simulate non GET/POST requests."
+keywords = ["web", "http", "hyper"]
+categories = ["Web programming", "HTTP server"]
+
 [dependencies]
 hyper = "0.13"
 url = "2.1"
