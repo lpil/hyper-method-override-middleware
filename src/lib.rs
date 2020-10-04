@@ -18,6 +18,7 @@ use std::borrow::Borrow;
 use std::task::{Context, Poll};
 use url::form_urlencoded;
 
+#[derive(Debug, Clone)]
 pub struct MethodOverrideMiddleware<T> {
     inner_service: T,
 }
@@ -61,4 +62,84 @@ fn override_method<Body>(req: &Request<Body>) -> Option<Method> {
             "PUT" => Some(Method::PUT),
             _ => None,
         })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hyper::service::{make_service_fn, service_fn};
+    use hyper::{Body, Request, Response, Server};
+    use std::convert::Infallible;
+
+    async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+        let body = format!("{:?}", req.method()).into();
+        Ok(Response::new(body))
+    }
+
+    async fn send(method: Method, url: &str) -> String {
+        reqwest::Client::new()
+            .execute(reqwest::Request::new(
+                method,
+                reqwest::Url::parse(url).unwrap(),
+            ))
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap()
+    }
+
+    #[tokio::test]
+    async fn override_test() {
+        let addr = ([127, 0, 0, 1], 1337).into();
+
+        tokio::spawn(Server::bind(&addr).serve(make_service_fn(|_| async {
+            let service = MethodOverrideMiddleware::new(service_fn(handle));
+            Ok::<_, hyper::Error>(service)
+        })));
+
+        // No override requested
+        assert_eq!(send(Method::GET, "http://127.0.0.1:1337").await, "GET");
+        assert_eq!(send(Method::PUT, "http://127.0.0.1:1337").await, "PUT");
+        assert_eq!(send(Method::POST, "http://127.0.0.1:1337").await, "POST");
+        assert_eq!(send(Method::PATCH, "http://127.0.0.1:1337").await, "PATCH");
+
+        // Successful overrides
+        assert_eq!(
+            send(Method::POST, "http://127.0.0.1:1337?a=1&b=2&_method=PATCH").await,
+            "PATCH"
+        );
+        assert_eq!(
+            send(Method::POST, "http://127.0.0.1:1337?a=1&b=2&_method=PUT").await,
+            "PUT"
+        );
+        assert_eq!(
+            send(Method::POST, "http://127.0.0.1:1337?a=1&b=2&_method=DELETE").await,
+            "DELETE"
+        );
+
+        // Other methods cannot be specified for overrides
+        assert_eq!(
+            send(Method::POST, "http://127.0.0.1:1337?a=1&b=2&_method=GET").await,
+            "POST"
+        );
+        assert_eq!(
+            send(Method::POST, "http://127.0.0.1:1337?_method=OPTIONS").await,
+            "POST"
+        );
+
+        // Non-POST requests don't get overriden
+        assert_eq!(
+            send(Method::GET, "http://127.0.0.1:1337?_method=PATCH").await,
+            "GET"
+        );
+        assert_eq!(
+            send(Method::DELETE, "http://127.0.0.1:1337?_method=PUT").await,
+            "DELETE"
+        );
+        assert_eq!(
+            send(Method::PATCH, "http://127.0.0.1:1337?_method=DELETE").await,
+            "PATCH"
+        );
+    }
 }
