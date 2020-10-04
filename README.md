@@ -6,7 +6,7 @@
 <!-- [![CI](https://github.com/lpil/hyper-method-override-middleware/workflows/CI/badge.svg)](https://github.com/lpil/hyper-method-override-middleware/actions) -->
 
 A middleware for Hyper that overrides an incoming POST request with a method
-given in the request's `_method` query paramerter. This is useful as web
+given in the request's `_method` query parameter. This is useful as web
 browsers typically only support GET and POST requests, but our application may
 expect other HTTP methods that are more semantically correct.
 
